@@ -1,0 +1,29 @@
+This document is for viewing main depencies as requirments.txt containes helper modules of these main depencies.
+
+# --- Core Framework ---
+Flask==3.0.3
+
+# --- Database and ORM ---
+Flask-SQLAlchemy==3.1.1
+psycopg2-binary==2.9.9  # PostgreSQL
+SQLAlchemy==2.0.34
+python-dotenv==1.0.1    # For loading environment variables from .env
+
+# --- Authentication & Security ---
+Flask-JWT-Extended==4.6.0
+bcrypt==4.2.0
+
+# --- CORS (Frontend <-> Backend communication) ---
+Flask-Cors==4.0.1
+
+# --- Testing ---
+pytest==8.3.3
+requests==2.32.3  # for API testing
+
+# --- Deployment ---
+gunicorn==23.0.0  # production server (Render, PythonAnywhere, etc.)
+
+# --- Optional (if you plan to export reports) ---
+pandas==2.2.3     # for data handling in reports
+openpyxl==3.1.5   # for Excel export
+reportlab==4.2.2  # for PDF generation
