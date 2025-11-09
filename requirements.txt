@@ -1,16 +1,39 @@
+# --- Core Framework ---
+flask==3.1.2
+
+# --- Database and ORM ---
+flask-sqlalchemy==3.1.1
+psycopg2-binary==2.9.11  # PostgreSQL
+sqlalchemy==2.0.44
+python-dotenv==1.2.1    # For loading environment variables from .env
+
+# --- Authentication & Security ---
+flask-jwt-extended==4.7.1
 bcrypt==5.0.0
+
+# --- CORS (Frontend <-> Backend communication) ---
+flask-cors==6.0.1
+
+# --- Testing ---
+pytest==8.4.2
+requests==2.32.5  # for API testing
+
+# --- Deployment ---
+gunicorn==23.0.0  # production server (Render, PythonAnywhere, etc.)
+
+# --- Data Processing ---
+pandas==2.3.3     # for data handling in reports
+openpyxl==3.1.5   # for Excel export
+reportlab==4.4.4  # for PDF generation
+
+# Other
 blinker==1.9.0
 certifi==2025.10.5
 charset-normalizer==3.4.4
 click==8.3.0
 colorama==0.4.6
 et-xmlfile==2.0.0
-flask==3.1.2
-flask-cors==6.0.1
-flask-jwt-extended==4.7.1
-flask-sqlalchemy==3.1.1
 greenlet==3.2.4
-gunicorn==23.0.0
 idna==3.11
 iniconfig==2.3.0
 itsdangerous==2.2.0
@@ -18,23 +41,15 @@ jinja2==3.1.6
 markupsafe==3.0.3
 marshmallow==4.0.1
 numpy==2.3.4
-openpyxl==3.1.5
 packaging==25.0
-pandas==2.3.3
 pillow==12.0.0
 pip==25.3
 pluggy==1.6.0
-psycopg2-binary==2.9.11
 pygments==2.19.2
 pyjwt==2.10.1
-pytest==8.4.2
 python-dateutil==2.9.0.post0
-python-dotenv==1.2.1
 pytz==2025.2
-reportlab==4.4.4
-requests==2.32.5
 six==1.17.0
-sqlalchemy==2.0.44
 typing-extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
