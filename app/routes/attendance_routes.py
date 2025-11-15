@@ -6,7 +6,7 @@ from app.db.models import WorkLocation
 
 bp = Blueprint("attendance", __name__)
 
-@bp.route("/checkin", methods=["POST"])
+@bp.post("/checkin")
 @jwt_required()
 def check_in():
     db = get_db()
@@ -14,5 +14,14 @@ def check_in():
     location = WorkLocation(request.json.get("location", "office"))
     service = AttendanceService(db, user_id)
     record = service.check_in(location)
-    #return jsonify({"id": record.id, "status": "checked_in"})
-    return jsonify({"status": "checked_in"})
+    return jsonify({"id": record.id, "status": "checked_in"})
+
+
+@bp.post("/checkout")
+@jwt_required()
+def check_out():
+    db = get_db()
+    user_id = get_jwt_identity()
+    service = AttendanceService(db, user_id)
+    record = service.check_out()
+    return jsonify({"id": record.id, "status": "checked_out"})
