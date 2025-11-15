@@ -15,12 +15,14 @@ def create_app():
     JWTManager(app)
 
     # Adatbázis inicializálás
-    init_db()
+    with app.app_context():
+        init_db(app)
+
 
     # Blueprintek regisztrálása
-    app.register_blueprint(auth_routes.bp, url_prefix="/api/auth")
-    app.register_blueprint(user_routes.bp, url_prefix="/api/users")
+    #app.register_blueprint(auth_routes.bp, url_prefix="/api/auth")
+    #app.register_blueprint(user_routes.bp, url_prefix="/api/users")
     app.register_blueprint(attendance_routes.bp, url_prefix="/api/attendance")
-    app.register_blueprint(admin_routes.bp, url_prefix="/api/admin")
+    #app.register_blueprint(admin_routes.bp, url_prefix="/api/admin")
 
     return app
