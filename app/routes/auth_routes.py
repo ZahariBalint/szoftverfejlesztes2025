@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-from  flask_jwt_extended import get_jwt_identity, jwt_required
 from app.db.engine import get_db
 from app.services.auth_service import AuthService
 
@@ -53,18 +52,3 @@ def login():
         })
     except ValueError as e:
         return jsonify({"error": str(e)}), 401
-    
-@bp.get("/me")
-@jwt_required()
-def me():
-    db = get_db()
-    service = AuthService(db)
-    user_id = get_jwt_identity()
-
-    user = service.get_user_by_id(user_id)
-    return jsonify({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
-    })

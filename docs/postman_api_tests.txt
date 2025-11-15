@@ -1,0 +1,3 @@
+Csináltam API teszteteket a meglévő route-okhoz, ezt tudjátok importnálni.
+
+https://leviipope-385df223-5389776.postman.co/workspace/leviipope's-Workspace~ed15ade6-63c0-4fe9-8bde-ee16706bc8d5/collection/49839064-c3e50d64-693b-4663-8e4a-e09ea4aa0cc0?action=share&creator=49839064&active-environment=49839064-e22bd9c6-244f-42d0-90b4-757a212fa8da
