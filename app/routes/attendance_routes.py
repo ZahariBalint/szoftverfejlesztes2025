@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.db.engine import get_db
 from app.services.attendance_service import AttendanceService
 from app.db.models import WorkLocation
+from app.utils.timecalc import parse_dt
 
 bp = Blueprint("attendance", __name__)
 
@@ -16,3 +17,110 @@ def check_in():
     record = service.check_in(location)
     #return jsonify({"id": record.id, "status": "checked_in"})
     return jsonify({"status": "checked_in"})
+
+@bp.route("/checkout", methods=["POST"])
+@jwt_required()
+def check_out():
+    db = get_db()
+    user_id = get_jwt_identity()
+    location = WorkLocation(request.json.get("location", "office"))
+    service = AttendanceService(db, user_id)
+    record = service.check_out(location)
+    return jsonify(
+        {
+            "status": "checked_out",
+            "location": record.work_location.value,
+            "work_duration_minutes": record.work_duration,
+        }
+    ), 200
+
+@bp.route("/modifications", methods=["POST"])
+@jwt_required()
+def request_modification():
+    """
+    Módosítási kérelem létrehozása a saját munkamenetre.
+    Várható body (JSON):
+    {
+        "work_session_id": 123,              # kötelező
+        "requested_check_in": "2025-11-15T08:00:00",   # opcionális, ISO 8601
+        "requested_check_out": "2025-11-15T16:30:00",  # opcionális, ISO 8601
+        "requested_location": "office" | "home_office" | ...,
+        "reason": "Indoklás szövege"
+    }
+    """
+
+    data = request.get_json() or {}
+    work_session_id = data.get("work_session_id")
+
+    try:
+        requested_check_in = parse_dt(data.get("requested_check_in"))
+        requested_check_out = parse_dt(data.get("requested_check_out"))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    requested_location = WorkLocation(data["requested_location"])
+    reason = data.get("reason")
+
+    db = get_db()
+    user_id = get_jwt_identity()
+    service = AttendanceService(db, user_id)
+
+    try:
+        req = service.request_modification(
+            work_session_id=work_session_id,
+            requested_check_in=requested_check_in,
+            requested_check_out=requested_check_out,
+            requested_location=requested_location,
+            reason=reason,
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify(
+        {
+            "id": req.id,
+            "work_session_id": req.work_session_id,
+            "status": req.status.value,
+            "reason": req.reason,
+        }
+    ), 201
+
+@bp.route("/modifications/<int:modification_id>/review", methods=["POST"])
+@jwt_required()
+def review_modification(modification_id: int):
+    """
+    Módosítási kérelem elbírálása (admin funkció).
+    Várható body (JSON):
+    {
+        "approve": true/false, # kötelező
+        "rejection_reason": "Indoklás elutasítás esetén"   # opcionális
+    }
+    """
+    data = request.get_json() or {}
+
+    approve = bool(data.get("approve"))
+    rejection_reason = data.get("rejection_reason")
+
+    db = get_db()
+    reviewer_id = get_jwt_identity()
+    service = AttendanceService(db, reviewer_id)
+
+    try:
+        mod = service.review_modification(
+            modification_id=modification_id,
+            approve=approve,
+            reviewer_id=reviewer_id,
+            rejection_reason=rejection_reason,
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify(
+        {
+            "id": mod.id,
+            "work_session_id": mod.work_session_id,
+            "status": mod.status.value,
+            "rejection_reason": getattr(mod, "rejection_reason", None),
+            "reviewed_by": mod.reviewed_by,
+        }
+    ), 200
