@@ -7,7 +7,7 @@ from app.utils.timecalc import parse_dt
 
 bp = Blueprint("attendance", __name__)
 
-@bp.route("/checkin", methods=["POST"])
+@bp.post("/checkin")
 @jwt_required()
 def check_in():
     db = get_db()
@@ -15,26 +15,19 @@ def check_in():
     location = WorkLocation(request.json.get("location", "office"))
     service = AttendanceService(db, user_id)
     record = service.check_in(location)
-    #return jsonify({"id": record.id, "status": "checked_in"})
-    return jsonify({"status": "checked_in"})
+    return jsonify({"id": record.id, "status": "checked_in"})
 
-@bp.route("/checkout", methods=["POST"])
+
+@bp.post("/checkout")
 @jwt_required()
 def check_out():
     db = get_db()
     user_id = get_jwt_identity()
-    location = WorkLocation(request.json.get("location", "office"))
     service = AttendanceService(db, user_id)
-    record = service.check_out(location)
-    return jsonify(
-        {
-            "status": "checked_out",
-            "location": record.work_location.value,
-            "work_duration_minutes": record.work_duration,
-        }
-    ), 200
+    record = service.check_out()
+    return jsonify({"id": record.id, "status": "checked_out"})
 
-@bp.route("/modifications", methods=["POST"])
+@bp.post("/modifications")
 @jwt_required()
 def request_modification():
     """
@@ -85,7 +78,7 @@ def request_modification():
         }
     ), 201
 
-@bp.route("/modifications/<int:modification_id>/review", methods=["POST"])
+@bp.post("/modifications/<int:modification_id>/review")
 @jwt_required()
 def review_modification(modification_id: int):
     """
