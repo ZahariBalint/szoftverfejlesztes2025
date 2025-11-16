@@ -1,13 +1,14 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from app.db.engine import get_db
-from app.db.models import AttendanceRecord
+from app.db.models import AttendanceRecord, User
 from app.services.report_service import ReportService
 from app.services.user_service import UserService
 from app.utils.decorators import admin_required
 from app.utils.timecalc import parse_dt
 
 bp = Blueprint("admin", __name__)
+
 
 @bp.get("/users")
 @jwt_required()
@@ -30,7 +31,7 @@ def get_all_users():
         } for user in users
     ]
 
-    return jsonify(users_list)
+    return jsonify(users_list), 200
 
 
 @bp.get("/attendancerecords")
@@ -47,7 +48,8 @@ def get_all_attendance_records():
             "user_id": record.user_id,
             "check_in": record.check_in.isoformat() if record.check_in else None,
             "check_out": record.check_out.isoformat() if record.check_out else None,
-            "work_location": record.work_location.value if hasattr(record.work_location, 'value') else str(record.work_location),
+            "work_location": record.work_location.value if hasattr(record.work_location, 'value') else str(
+                record.work_location),
             "work_duration": record.work_duration,
             "date": record.date.isoformat() if record.date else None,
             "is_overtime_generated": record.is_overtime_generated,
@@ -57,7 +59,8 @@ def get_all_attendance_records():
         for record in records
     ]
 
-    return jsonify(records_list)
+    return jsonify(records_list), 200
+
 
 @bp.get("/location-stats")
 @jwt_required()
@@ -71,6 +74,7 @@ def get_user_location_stats():
     service = ReportService(db)
     stats = service.get_location_stats()
     return jsonify(stats), 200
+
 
 @bp.get("/overtime")
 @admin_required()
@@ -97,7 +101,6 @@ def get_user_overtime():
         end_date=end_date,
     )
 
-
     result = []
     for r in records:
         result.append(
@@ -114,9 +117,10 @@ def get_user_overtime():
 
     return jsonify(result), 200
 
+
 @bp.get("/summary")
 @admin_required()
-def get_summary():
+def get_user_summary():
     """
     Összefoglaló riport.
     Query paraméterek:
@@ -136,3 +140,51 @@ def get_summary():
 
     stats = service.get_summary(user_id, start_date, end_date)
     return jsonify(stats), 200
+
+
+@bp.get("/user/<username>")
+@admin_required()
+def get_user_by_username(username: str):
+    """
+    Felhasználót keres a megadott név alapján.
+    """
+    db = get_db()
+    service = UserService(db)
+    user = service.get_user_by_username(username)
+    if user is None:
+        return jsonify({"error": f"User with username '{username}' not found"}), 404
+
+    user_json = {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
+                    "is_active": user.is_active,
+                    "created_at": user.created_at.isoformat(),
+                    "updated_at": user.updated_at.isoformat(),
+                 }
+    return jsonify(user_json), 200
+
+@bp.get("/user/<id>")
+@admin_required()
+def get_user_by_id(id: int):
+    """
+    Felhasználót keres az azonosító alapján.
+    """
+    db = get_db()
+    service = UserService(db)
+    user = service.get_user_by_id(id)
+    if user is None:
+        return jsonify({"error": f"User with id '{id}' not found"}), 404
+
+    user_json = {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
+                    "is_active": user.is_active,
+                    "created_at": user.created_at.isoformat(),
+                    "updated_at": user.updated_at.isoformat(),
+                }
+
+    return jsonify(user_json), 200
