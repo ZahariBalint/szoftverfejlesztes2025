@@ -44,4 +44,9 @@ def create_app():
     app.register_blueprint(attendance_routes.bp, url_prefix="/api/attendance")
     app.register_blueprint(admin_routes.bp, url_prefix="/api/admin")
 
+    # 404 hibakezelő
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return send_from_directory(app.static_folder, '404.html'), 404
+
     return app
