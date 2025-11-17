@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory, redirect
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from .config.settings import Config
@@ -7,7 +7,7 @@ from .routes import auth_routes, user_routes, attendance_routes, admin_routes
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='../static', static_url_path='/static')
     app.config.from_object(Config)
 
     # CORS és JWT beállítások
@@ -18,6 +18,25 @@ def create_app():
     with app.app_context():
         init_db(app)
 
+    # Főoldal átirányítása a bejelentkezési oldalra
+    @app.route('/')
+    def index():
+        return redirect('/login')
+
+    # Login oldal kiszolgálása
+    @app.route('/login')
+    def login_page():
+        return send_from_directory(app.static_folder, 'login.html')
+
+    # Register oldal kiszolgálása
+    @app.route('/register')
+    def register_page():
+        return send_from_directory(app.static_folder, 'register.html')
+
+    # Dashboard oldal kiszolgálása
+    @app.route('/dashboard')
+    def dashboard_page():
+        return send_from_directory(app.static_folder, 'dashboard.html')
 
     # Blueprintek regisztrálása
     app.register_blueprint(auth_routes.bp, url_prefix="/api/auth")

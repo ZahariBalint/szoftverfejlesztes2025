@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Munkaidő Nyilvántartás</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>Munkaidő Nyilvántartás</h1>
+                <div class="user-info">
+                    <span id="username">Felhasználó</span>
+                    <button id="logoutBtn" class="logout-btn">Kijelentkezés</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <div class="timer-container">
+                <button id="timerBtn" class="timer-button">
+                    <span class="timer-text" id="timerText">Start</span>
+                </button>
+            </div>
+
+            <div class="weekly-view-container">
+                <div class="week-navigation">
+                    <button id="prevWeekBtn" class="nav-btn">← Előző hét</button>
+                    <div class="week-info">
+                        <span id="weekRange"></span>
+                        <button id="todayBtn" class="today-btn">Mai hét</button>
+                    </div>
+                    <button id="nextWeekBtn" class="nav-btn">Következő hét →</button>
+                </div>
+                
+                <div class="time-axis">
+                    <div class="time-labels">
+                        <div class="time-label">20:00</div>
+                        <div class="time-label">18:00</div>
+                        <div class="time-label">16:00</div>
+                        <div class="time-label">14:00</div>
+                        <div class="time-label">12:00</div>
+                        <div class="time-label">10:00</div>
+                        <div class="time-label">8:00</div>
+                        <div class="time-label">6:00</div>
+                    </div>
+                </div>
+
+                <div class="weekly-grid">
+                    <div class="day-column" data-day="Monday">
+                        <div class="day-header">
+                            <div class="day-name">Hétfő</div>
+                            <div class="day-date" id="monday-date"></div>
+                        </div>
+                        <div class="day-content" id="monday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Tuesday">
+                        <div class="day-header">
+                            <div class="day-name">Kedd</div>
+                            <div class="day-date" id="tuesday-date"></div>
+                        </div>
+                        <div class="day-content" id="tuesday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Wednesday">
+                        <div class="day-header">
+                            <div class="day-name">Szerda</div>
+                            <div class="day-date" id="wednesday-date"></div>
+                        </div>
+                        <div class="day-content" id="wednesday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Thursday">
+                        <div class="day-header">
+                            <div class="day-name">Csütörtök</div>
+                            <div class="day-date" id="thursday-date"></div>
+                        </div>
+                        <div class="day-content" id="thursday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Friday">
+                        <div class="day-header">
+                            <div class="day-name">Péntek</div>
+                            <div class="day-date" id="friday-date"></div>
+                        </div>
+                        <div class="day-content" id="friday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Saturday">
+                        <div class="day-header">
+                            <div class="day-name">Szombat</div>
+                            <div class="day-date" id="saturday-date"></div>
+                        </div>
+                        <div class="day-content" id="saturday-content"></div>
+                    </div>
+                    <div class="day-column" data-day="Sunday">
+                        <div class="day-header">
+                            <div class="day-name">Vasárnap</div>
+                            <div class="day-date" id="sunday-date"></div>
+                        </div>
+                        <div class="day-content" id="sunday-content"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
+
