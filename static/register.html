@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regisztráció</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Regisztráció</h1>
+                <p>Hozzon létre új fiókot</p>
+            </div>
+            
+            <form id="registerForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Felhasználónév</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Felhasználónév"
+                        required
+                        autocomplete="username"
+                        minlength="3"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email cím</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="email@example.com"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Jelszó</label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Jelszó (minimum 3 karakter)"
+                            required
+                            autocomplete="new-password"
+                            minlength="3"
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Jelszó megjelenítése">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Jelszó megerősítése</label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            placeholder="Jelszó újra"
+                            required
+                            autocomplete="new-password"
+                            minlength="3"
+                        >
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Jelszó megjelenítése">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                
+                <button type="submit" class="login-button" id="registerButton">
+                    <span class="button-text">Regisztráció</span>
+                    <span class="button-loader" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Már van fiókja? <a href="/login" id="loginLink">Bejelentkezés</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/register.js"></script>
+</body>
+</html>
+
