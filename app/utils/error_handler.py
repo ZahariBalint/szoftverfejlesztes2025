@@ -14,6 +14,9 @@ class ServiceError(Exception):
             self.status_code = status_code
         self.message = message
 
+class ValidationError(ServiceError):
+    """Érvényesítési hiba, rossz input vagy üzleti logikai hiba."""
+    status_code = 400
 
 class NotFoundError(ServiceError):
     """Erőforrás nem található."""
