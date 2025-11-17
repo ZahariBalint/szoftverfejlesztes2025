@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.db.models import User
 
 class UserService:
@@ -9,6 +10,10 @@ class UserService:
         """Fetches a user by their ID."""
         return self.db.query(User).get(user_id)
 
-    def get_all_users(self) -> list[User]:
+    def get_all_users(self) -> list[type[User]]:
         """Fetches all users."""
         return self.db.query(User).all()
+
+    def get_user_by_username(self, username: str) -> User | None:
+        """Fetches a user by their username."""
+        return self.db.query(User).filter(User.username == username).first()
