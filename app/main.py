@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from .config.settings import Config
 from .db.engine import init_db
 from .routes import auth_routes, user_routes, attendance_routes, admin_routes
-
+from app.utils.error_handler import register_error_handlers
 
 def create_app():
     app = Flask(__name__, static_folder='../static', static_url_path='/static')
@@ -37,6 +37,7 @@ def create_app():
     @app.route('/dashboard')
     def dashboard_page():
         return send_from_directory(app.static_folder, 'dashboard.html')
+    register_error_handlers(app)
 
     # Blueprintek regisztrálása
     app.register_blueprint(auth_routes.bp, url_prefix="/api/auth")
