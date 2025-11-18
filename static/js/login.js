@@ -69,7 +69,12 @@ loginForm.addEventListener('submit', async (e) => {
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('user', JSON.stringify(data.user));
             
-            window.location.href = '/dashboard';
+            const role = data.user?.role;
+            if (role && role.toLowerCase() === 'admin') {
+                window.location.href = '/admin';
+            } else {
+                window.location.href = '/dashboard';
+            }
         } else {
             showError('Váratlan hiba történt a bejelentkezés során');
         }

@@ -37,6 +37,11 @@ def create_app():
     @app.route('/dashboard')
     def dashboard_page():
         return send_from_directory(app.static_folder, 'dashboard.html')
+
+    @app.route('/admin')
+    def admin_page():
+        return send_from_directory(app.static_folder, 'admin.html')
+
     register_error_handlers(app)
 
     # Blueprintek regisztrálása
