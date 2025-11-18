@@ -207,7 +207,7 @@ async function loadOvertimeRequests() {
                 <td>${req.id}</td>
                 <td>${escapeHtml(req.username || req.user_id || "")}</td>
                 <td>${escapeHtml(req.work_session_id || "")}</td>
-                <td>${req.overtime_minutes}</td>
+                <td>${req.overtime_minutes/60}</td>
                 <td>${escapeHtml(req.request_date || "")}</td>
                 <td><span class="tag ${statusClass}">${escapeHtml(req.status || "")}</span></td>
                 <td>
