@@ -1,13 +1,14 @@
 from typing import Optional
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.db.crud import get_attendance_records_by_user
 from app.db.engine import get_db
 from app.db.models import AttendanceRecord, User, ModificationRequest, RequestStatus, OvertimeRequest
 from app.services.report_service import ReportService
 from app.services.user_service import UserService
+from app.services.attendance_service import AttendanceService
 from app.utils.decorators import admin_required
 from app.utils.timecalc import parse_dt
 
@@ -201,34 +202,36 @@ def get_user_by_id(id: int):
 @bp.get("/modification-requests")
 @jwt_required()
 @admin_required()
-def list_modification_requests():
-    status_param = request.args.get("status", type=str)
+def get_modification_requests():
     db = get_db()
+    status_filter = request.args.get("status")
+    
     query = db.query(ModificationRequest)
-
-    if status_param:
+    if status_filter:
         try:
-            status_enum = RequestStatus(status_param.lower())
+            status_enum = RequestStatus(status_filter)
             query = query.filter(ModificationRequest.status == status_enum)
         except ValueError:
-            return jsonify({"error": "Érvénytelen státusz paraméter."}), 400
-
-    requests_qs = query.order_by(ModificationRequest.created_at.desc()).all()
-
+            pass # Ignore invalid status
+            
+    requests = query.all()
+    
     result = []
-    for req in requests_qs:
-        result.append(
-            {
-                "id": req.id,
-                "user_id": req.user_id,
-                "username": getattr(req.user, "username", None),
-                "period": getattr(req, "period", None),
-                "date": getattr(req, "date", None).isoformat() if getattr(req, "date", None) else None,
-                "reason": req.reason,
-                "status": req.status.value if hasattr(req.status, "value") else str(req.status),
-            }
-        )
-
+    for req in requests:
+        result.append({
+            "id": req.id,
+            "user_id": req.user_id,
+            "username": req.requester.username if req.requester else None,
+            "work_session_id": req.work_session_id,
+            "date": req.work_session.date.isoformat() if req.work_session and req.work_session.date else None,
+            "requested_check_in": req.requested_check_in.isoformat() if req.requested_check_in else None,
+            "requested_check_out": req.requested_check_out.isoformat() if req.requested_check_out else None,
+            "requested_work_location": req.requested_work_location.value if req.requested_work_location else None,
+            "reason": req.reason,
+            "status": req.status.value,
+            "created_at": req.created_at.isoformat(),
+        })
+        
     return jsonify(result), 200
 
 
@@ -237,29 +240,29 @@ def list_modification_requests():
 @admin_required()
 def review_modification_request(request_id: int):
     db = get_db()
-    data = request.get_json(silent=True) or {}
+    data = request.get_json() or {}
     approve = data.get("approve")
     reason = data.get("reason")
-
+    
     if approve is None:
-        return jsonify({"error": "A 'approve' mező kötelező (true/false)."}), 400
-
-    req_obj: ModificationRequest = (
-        db.query(ModificationRequest).filter_by(id=request_id).first()
-    )
-    if not req_obj:
-        return jsonify({"error": "A megadott kérelem nem található."}), 404
-
-    if approve:
-        req_obj.status = RequestStatus.APPROVED
-    else:
-        req_obj.status = RequestStatus.REJECTED
-        if hasattr(req_obj, "rejection_reason"):
-            req_obj.rejection_reason = reason
-
-    db.commit()
-
-    return jsonify({"message": "Kérelem elbírálva.", "status": req_obj.status.value}), 200
+        return jsonify({"error": "Missing 'approve' field"}), 400
+        
+    reviewer_id = int(get_jwt_identity())
+    service = AttendanceService(db, reviewer_id)
+    
+    try:
+        mod = service.review_modification(
+            modification_id=request_id,
+            approve=approve,
+            reviewer_id=reviewer_id,
+            rejection_reason=reason
+        )
+        return jsonify({
+            "id": mod.id,
+            "status": mod.status.value
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 # --- Túlóra kérelmek – útvonalak JS-hez igazítva ---

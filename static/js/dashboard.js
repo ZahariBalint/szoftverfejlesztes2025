@@ -13,6 +13,10 @@ const prevWeekBtn = document.getElementById('prevWeekBtn');
 const nextWeekBtn = document.getElementById('nextWeekBtn');
 const todayBtn = document.getElementById('todayBtn');
 const weekRangeSpan = document.getElementById('weekRange');
+const modificationModal = document.getElementById('modificationModal');
+const modificationForm = document.getElementById('modificationForm');
+const closeModalBtn = document.querySelector('.close');
+const cancelBtn = document.getElementById('cancelBtn');
 
 // State
 let weeklyData = null;
@@ -180,6 +184,12 @@ function createWorkBar(session, day) {
         bar.classList.add('active');
     }
     
+    // Store session data in the bar
+    bar.dataset.sessionId = session.id;
+    bar.dataset.checkIn = session.check_in;
+    bar.dataset.checkOut = session.check_out || '';
+    bar.dataset.location = session.work_location || 'office';
+    
     const checkInTime = parseTime(session.check_in_time);
     const checkOutTime = session.check_out_time ? parseTime(session.check_out_time) : null;
     
@@ -218,6 +228,12 @@ function createWorkBar(session, day) {
     bar.appendChild(label);
     
     bar.title = `${session.check_in_time}${session.check_out_time ? ` - ${session.check_out_time}` : ' (aktív)'}`;
+    
+    // Add click event listener to open modification modal (only for completed sessions)
+    if (!session.is_active && session.check_out) {
+        bar.style.cursor = 'pointer';
+        bar.addEventListener('click', () => openModificationModal(session));
+    }
     
     return bar;
 }
@@ -354,4 +370,137 @@ async function handleTimerClick() {
         timerBtn.disabled = false;
     }
 }
+
+// Modal functions
+function openModificationModal(session) {
+    // Fill in the form with session data
+    document.getElementById('workSessionId').value = session.id;
+    document.getElementById('originalCheckIn').value = formatDateTimeForDisplay(session.check_in);
+    document.getElementById('originalCheckOut').value = session.check_out ? formatDateTimeForDisplay(session.check_out) : 'N/A';
+    
+    // Pre-fill requested times with original times
+    if (session.check_in) {
+        document.getElementById('requestedCheckIn').value = formatDateTimeForInput(session.check_in);
+    }
+    if (session.check_out) {
+        document.getElementById('requestedCheckOut').value = formatDateTimeForInput(session.check_out);
+    }
+    
+    // Reset other fields
+    document.getElementById('requestedLocation').value = '';
+    document.getElementById('reason').value = '';
+    
+    // Show modal
+    modificationModal.classList.add('show');
+}
+
+function closeModificationModal() {
+    modificationModal.classList.remove('show');
+    modificationForm.reset();
+}
+
+function formatDateTimeForDisplay(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return date.toLocaleString('hu-HU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatDateTimeForInput(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    // Format as YYYY-MM-DDTHH:MM for datetime-local input
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Event listeners for modal
+closeModalBtn.addEventListener('click', closeModificationModal);
+cancelBtn.addEventListener('click', closeModificationModal);
+
+// Close modal when clicking outside of it
+window.addEventListener('click', (event) => {
+    if (event.target === modificationModal) {
+        closeModificationModal();
+    }
+});
+
+// Handle modification form submission
+modificationForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    const submitBtn = modificationForm.querySelector('.btn-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Küldés...';
+    
+    try {
+        const token = localStorage.getItem('access_token');
+        const formData = {
+            work_session_id: parseInt(document.getElementById('workSessionId').value),
+            reason: document.getElementById('reason').value
+        };
+        
+        console.log('Submitting modification request:', formData);
+        
+        // Add optional fields only if they have values
+        const requestedCheckIn = document.getElementById('requestedCheckIn').value;
+        if (requestedCheckIn) {
+            formData.requested_check_in = new Date(requestedCheckIn).toISOString();
+        }
+        
+        const requestedCheckOut = document.getElementById('requestedCheckOut').value;
+        if (requestedCheckOut) {
+            formData.requested_check_out = new Date(requestedCheckOut).toISOString();
+        }
+        
+        const requestedLocation = document.getElementById('requestedLocation').value;
+        if (requestedLocation) {
+            formData.requested_location = requestedLocation;
+        }
+        
+        console.log('Final form data:', formData);
+        
+        const response = await fetch(`${API_BASE_URL}/attendance/modifications`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.status === 401) {
+            handleLogout();
+            return;
+        }
+        
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Server error response:', data);
+            throw new Error(data.error || `Server error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Success
+        alert('Módosítási kérelem sikeresen beküldve!');
+        closeModificationModal();
+        
+    } catch (error) {
+        console.error('Error submitting modification request:', error);
+        alert(error.message || 'Hiba történt a kérelem beküldése során.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Kérelem beküldése';
+    }
+});
 

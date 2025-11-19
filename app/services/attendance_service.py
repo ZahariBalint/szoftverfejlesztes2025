@@ -167,6 +167,7 @@ class AttendanceService:
             record = self.db.get(AttendanceRecord, work_session_id)
             if not record:
                 raise NotFoundError("A megadott munkamenet nem létezik.")
+            
             if record.user_id != self.current_user_id:
                 raise ForbiddenError("Nincs jogosultságod a rekord módosításához.")
 
