@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>WorkTrack – Admin Panel</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>Admin Panel</h1>
+        <div>
+            <button class="btn btn-secondary" onclick="goToDashboard()">Vissza a Dashboard-ra</button>
+            <button class="btn btn-danger" onclick="logout()">Kijelentkezés</button>
+        </div>
+    </header>
+
+    <!-- Felhasználó keresése és jelenlétek -->
+    <section class="admin-section">
+        <h2>Felhasználó jelenlétei</h2>
+        <form class="form-inline" onsubmit="event.preventDefault(); loadUserAttendance();">
+            <label for="userIdentifier">Felhasználó (ID vagy felhasználónév):</label>
+            <input type="text" id="userIdentifier" placeholder="pl. 1 vagy john" required>
+            <label for="fromDate">Dátumtól:</label>
+            <input type="date" id="fromDate">
+            <label for="toDate">Dátumig:</label>
+            <input type="date" id="toDate">
+            <button type="submit" class="btn btn-primary">Lekérés</button>
+        </form>
+        <div id="attendanceStatus" class="status-message"></div>
+        <div style="overflow-x:auto;">
+            <table id="attendanceTable">
+                <thead>
+                <tr>
+                    <th>Dátum</th>
+                    <th>Bejelentkezés</th>
+                    <th>Kijelentkezés</th>
+                    <th>Munkavégzés helye</th>
+                    <th>Munkaidő (óra)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Dinamikusan töltve -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="flex-row">
+        <!-- Módosítási kérelmek -->
+        <section class="admin-section">
+            <h2>Módosítási kérelmek</h2>
+            <div class="status-message" id="modReqStatus"></div>
+            <div style="overflow-x:auto;">
+                <table id="modRequestsTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Felhasználó</th>
+                        <th>Dátum / Időszak</th>
+                        <th>Indoklás</th>
+                        <th>Státusz</th>
+                        <th>Műveletek</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Dinamikusan töltve -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Túlóra kérelmek -->
+        <section class="admin-section">
+            <h2>Túlóra kérelmek</h2>
+            <div class="status-message" id="overtimeStatus"></div>
+            <div style="overflow-x:auto;">
+                <table id="overtimeTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Felhasználó</th>
+                        <th>Jelenléti rekord</th>
+                        <th>Túlóra (óra)</th>
+                        <th>Kérelem dátuma</th>
+                        <th>Státusz</th>
+                        <th>Elutasítás indoka</th>
+                        <th>Műveletek</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Dinamikusan töltve -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="/static/js/admin.js"></script>
+</body>
+</html>

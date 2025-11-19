@@ -1,0 +1,232 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    min-height: 100vh;
+}
+
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+}
+
+/* Fejléc – hasonló a dashboard-hoz */
+.admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.admin-header h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.admin-header .btn {
+    margin-left: 0.5rem;
+}
+
+/* Kártyák – hasonló a dashboard dobozaihoz */
+.admin-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.admin-section h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Elrendezés */
+.flex-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.flex-row > * {
+    flex: 1 1 300px;
+}
+
+/* Form elemek */
+.form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-inline label {
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.form-inline input,
+.form-inline select {
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+}
+
+/* Gombok – dashboard-szerű */
+.btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #4b5563;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-success {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #15803d;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Táblázatok */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th,
+td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* Tag-ek / státusz jelölők */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    background-color: #e5e7eb;
+}
+
+.tag-pending {
+    background-color: #f97316;
+    color: #fff;
+}
+
+.tag-approved {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.tag-rejected {
+    background-color: #dc2626;
+    color: #fff;
+}
+
+/* Státusz üzenetek */
+.status-message {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.status-message.error {
+    color: #dc2626;
+}
+
+.status-message.success {
+    color: #16a34a;
+}
+
+/* Indoklás input */
+.reason-input {
+    width: 100%;
+    max-width: 260px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+
+/* Mobil nézet */
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .admin-container {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .flex-row {
+        flex-direction: column;
+    }
+}
