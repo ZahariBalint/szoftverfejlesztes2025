@@ -189,6 +189,7 @@ function createWorkBar(session, day) {
     bar.dataset.checkIn = session.check_in;
     bar.dataset.checkOut = session.check_out || '';
     bar.dataset.location = session.work_location || 'office';
+    bar.dataset.overtimeStatus = session.overtime_status || '';
     
     const checkInTime = parseTime(session.check_in_time);
     const checkOutTime = session.check_out_time ? parseTime(session.check_out_time) : null;
@@ -210,6 +211,18 @@ function createWorkBar(session, day) {
         const endMinutes = timeToMinutes(checkOutTime);
         const duration = endMinutes - startMinutes;
         heightPercent = (duration / TOTAL_MINUTES) * 100;
+        
+        // Apply overtime styling if pending
+        if (session.overtime_status === 'pending') {
+            bar.classList.add('pending-overtime');
+            bar.title += ' (Túlóra jóváhagyásra vár)';
+        } else if (session.overtime_status === 'approved') {
+            bar.classList.add('approved-overtime');
+            bar.title += ' (Túlóra jóváhagyva)';
+        } else if (session.overtime_status === 'rejected') {
+            bar.classList.add('rejected-overtime');
+            bar.title += ' (Túlóra elutasítva)';
+        }
     } else {
         // Fallback to duration_minutes
         heightPercent = (session.duration_minutes / TOTAL_MINUTES) * 100;
@@ -377,6 +390,18 @@ function openModificationModal(session) {
     document.getElementById('workSessionId').value = session.id;
     document.getElementById('originalCheckIn').value = formatDateTimeForDisplay(session.check_in);
     document.getElementById('originalCheckOut').value = session.check_out ? formatDateTimeForDisplay(session.check_out) : 'N/A';
+    
+    // Show overtime status if present
+    const modalHeader = document.querySelector('.modal-header h2');
+    if (session.overtime_status === 'pending') {
+        modalHeader.innerHTML = 'Módosítási kérelem <span class="status-badge pending">Túlóra jóváhagyásra vár</span>';
+    } else if (session.overtime_status === 'approved') {
+        modalHeader.innerHTML = 'Módosítási kérelem <span class="status-badge approved">Túlóra jóváhagyva</span>';
+    } else if (session.overtime_status === 'rejected') {
+        modalHeader.innerHTML = 'Módosítási kérelem <span class="status-badge rejected">Túlóra elutasítva</span>';
+    } else {
+        modalHeader.textContent = 'Módosítási kérelem';
+    }
     
     // Pre-fill requested times with original times
     if (session.check_in) {

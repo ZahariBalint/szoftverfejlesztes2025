@@ -163,3 +163,19 @@ def review_modification(modification_id: int):
             "reviewed_by": mod.reviewed_by,
         }
     ), 200
+
+@bp.post("/simulate-overtime")
+@jwt_required()
+def simulate_overtime():
+    """Teszt végpont: létrehoz egy 10 órás munkamenetet a mai napra."""
+    db = get_db()
+    user_id = int(get_jwt_identity())
+    service = AttendanceService(db, user_id)
+    
+    try:
+        record = service.simulate_overtime(minutes=600) # 10 hours
+        return jsonify({"message": "Overtime simulated", "id": record.id}), 201
+    except ValidationError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

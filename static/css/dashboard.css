@@ -252,6 +252,15 @@ body {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+.work-bar.pending-overtime {
+    background: linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%);
+    box-shadow: 0 2px 8px rgba(214, 158, 46, 0.3);
+}
+
+.work-bar.rejected-overtime {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+}
+
 .work-bar-label {
     position: absolute;
     top: -20px;
@@ -259,6 +268,34 @@ body {
     font-size: 11px;
     color: #666;
     white-space: nowrap;
+}
+
+/* Status badges in modal */
+.status-badge {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-weight: normal;
+}
+
+.status-badge.pending {
+    background-color: #fefcbf;
+    color: #b7791f;
+    border: 1px solid #f6e05e;
+}
+
+.status-badge.approved {
+    background-color: #c6f6d5;
+    color: #2f855a;
+    border: 1px solid #9ae6b4;
+}
+
+.status-badge.rejected {
+    background-color: #fed7d7;
+    color: #c53030;
+    border: 1px solid #feb2b2;
 }
 
 /* Time grid lines */
