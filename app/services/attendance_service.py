@@ -59,9 +59,9 @@ class AttendanceService:
             record.work_location = work_location
             record.work_duration = record.calculate_duration()
 
-            # túlóra detektálás (8 órán felül)
-            if record.work_duration and record.work_duration > 480:
-                overtime_minutes = record.work_duration - 480
+            # túlóra detektálás (9 órán felül = 540 perc)
+            if record.work_duration and record.work_duration > 540:
+                overtime_minutes = record.work_duration - 540
                 overtime = OvertimeRequest(
                     user_id=self.current_user_id,
                     work_session=record,
@@ -137,7 +137,8 @@ class AttendanceService:
                 'check_in_time': check_in_time.strftime('%H:%M') if check_in_time else None,
                 'check_out_time': check_out_time.strftime('%H:%M') if check_out_time else None,
                 'duration_minutes': duration,
-                'is_active': active_session and active_session.id == record.id
+                'is_active': active_session and active_session.id == record.id,
+                'overtime_status': record.overtime_request.status.value if record.overtime_request else None
             })
 
         active_info = None
@@ -167,6 +168,7 @@ class AttendanceService:
             record = self.db.get(AttendanceRecord, work_session_id)
             if not record:
                 raise NotFoundError("A megadott munkamenet nem létezik.")
+            
             if record.user_id != self.current_user_id:
                 raise ForbiddenError("Nincs jogosultságod a rekord módosításához.")
 
@@ -221,6 +223,55 @@ class AttendanceService:
         except SQLAlchemyError:
             self.db.rollback()
             raise ServiceError("Adatbázis hiba a kérelem feldolgozásakor")
+
+    # --- Tesztelői segédfüggvények ---
+
+    def simulate_overtime(self, minutes=600):
+        """Teszteléshez: létrehoz egy lezárt munkamenetet a mai napra, ami túlórás."""
+        # Check if there is an active session, if so, close it first or error
+        active = (
+            self.db.query(AttendanceRecord)
+            .filter(
+                AttendanceRecord.user_id == self.current_user_id,
+                AttendanceRecord.check_out.is_(None),
+            )
+            .first()
+        )
+        if active:
+            raise ValidationError("Van aktív munkamenet, előbb jelentkezz ki!")
+
+        # Create a session that started 'minutes' ago and ended now
+        end_time = datetime.now()
+        start_time = end_time - timedelta(minutes=minutes)
+        
+        record = AttendanceRecord(
+            user_id=self.current_user_id,
+            check_in=start_time,
+            check_out=end_time,
+            work_location=WorkLocation.OFFICE,
+            date=start_time.date(),
+            work_duration=minutes,
+            is_overtime_generated=False # Will be set below
+        )
+        self.db.add(record)
+        self.db.flush() # Get ID
+        
+        # Trigger overtime logic manually since we are bypassing check_out
+        if minutes > 540:
+            overtime_minutes = minutes - 540
+            overtime = OvertimeRequest(
+                user_id=self.current_user_id,
+                work_session_id=record.id,
+                overtime_minutes=overtime_minutes,
+                status=RequestStatus.PENDING,
+                is_auto_generated=True,
+            )
+            self.db.add(overtime)
+            record.is_overtime_generated = True
+            
+        self.db.commit()
+        self._log_action("simulate_overtime", entity_id=record.id, desc=f"Szimulált túlóra: {minutes} perc")
+        return record
 
     # --- Audit log segédfüggvény ---
 

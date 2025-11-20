@@ -5,6 +5,7 @@ from app.services.attendance_service import AttendanceService
 from app.db.models import WorkLocation
 from datetime import date
 from app.utils.timecalc import parse_dt
+from app.utils.error_handler import NotFoundError, ForbiddenError, ValidationError, ServiceError
 
 bp = Blueprint("attendance", __name__)
 
@@ -12,7 +13,7 @@ bp = Blueprint("attendance", __name__)
 @jwt_required()
 def check_in():
     db = get_db()
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     location = WorkLocation(request.json.get("location", "office"))
     service = AttendanceService(db, user_id)
     record = service.check_in(location)
@@ -23,7 +24,7 @@ def check_in():
 @jwt_required()
 def check_out():
     db = get_db()
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     service = AttendanceService(db, user_id)
     record = service.check_out()
     return jsonify({"id": record.id, "status": "checked_out"})
@@ -34,7 +35,7 @@ def check_out():
 def get_weekly_attendance():
     """A heti jelenléti adatok lekérése a hétre, a dashboardhoz kell"""
     db = get_db()
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     service = AttendanceService(db, user_id)
     
     week_start = None
@@ -63,24 +64,34 @@ def request_modification():
         "reason": "Indoklás szövege"
     }
     """
-
-    data = request.get_json() or {}
-    work_session_id = data.get("work_session_id")
-
+    
     try:
-        requested_check_in = parse_dt(data.get("requested_check_in"))
-        requested_check_out = parse_dt(data.get("requested_check_out"))
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        data = request.get_json() or {}
+        work_session_id = data.get("work_session_id")
+        
+        if not work_session_id:
+            return jsonify({"error": "work_session_id is required"}), 400
 
-    requested_location = WorkLocation(data["requested_location"])
-    reason = data.get("reason")
+        try:
+            requested_check_in = parse_dt(data.get("requested_check_in"))
+            requested_check_out = parse_dt(data.get("requested_check_out"))
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
 
-    db = get_db()
-    user_id = get_jwt_identity()
-    service = AttendanceService(db, user_id)
+        # Handle optional requested_location
+        requested_location = None
+        if data.get("requested_location"):
+            try:
+                requested_location = WorkLocation(data["requested_location"])
+            except (ValueError, KeyError):
+                return jsonify({"error": "Invalid work location"}), 400
+        
+        reason = data.get("reason")
 
-    try:
+        db = get_db()
+        user_id = int(get_jwt_identity())
+        service = AttendanceService(db, user_id)
+
         req = service.request_modification(
             work_session_id=work_session_id,
             requested_check_in=requested_check_in,
@@ -88,17 +99,30 @@ def request_modification():
             requested_location=requested_location,
             reason=reason,
         )
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
 
-    return jsonify(
-        {
-            "id": req.id,
-            "work_session_id": req.work_session_id,
-            "status": req.status.value,
-            "reason": req.reason,
-        }
-    ), 201
+        return jsonify(
+            {
+                "id": req.id,
+                "work_session_id": req.work_session_id,
+                "status": req.status.value,
+                "reason": req.reason,
+            }
+        ), 201
+    
+    except NotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    except ForbiddenError as e:
+        return jsonify({"error": str(e)}), 403
+    except ValidationError as e:
+        return jsonify({"error": str(e)}), 400
+    except ServiceError as e:
+        return jsonify({"error": str(e)}), e.status_code if hasattr(e, 'status_code') else 500
+    except Exception as e:
+        # Log the full error for debugging
+        print(f"Error in request_modification: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @bp.post("/modifications/<int:modification_id>/review")
 @jwt_required()
@@ -117,7 +141,7 @@ def review_modification(modification_id: int):
     rejection_reason = data.get("rejection_reason")
 
     db = get_db()
-    reviewer_id = get_jwt_identity()
+    reviewer_id = int(get_jwt_identity())
     service = AttendanceService(db, reviewer_id)
 
     try:
@@ -139,3 +163,19 @@ def review_modification(modification_id: int):
             "reviewed_by": mod.reviewed_by,
         }
     ), 200
+
+@bp.post("/simulate-overtime")
+@jwt_required()
+def simulate_overtime():
+    """Teszt végpont: létrehoz egy 10 órás munkamenetet a mai napra."""
+    db = get_db()
+    user_id = int(get_jwt_identity())
+    service = AttendanceService(db, user_id)
+    
+    try:
+        record = service.simulate_overtime(minutes=600) # 10 hours
+        return jsonify({"message": "Overtime simulated", "id": record.id}), 201
+    except ValidationError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

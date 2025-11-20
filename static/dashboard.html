@@ -104,6 +104,66 @@
         </main>
     </div>
 
+    <!-- Modification Request Modal -->
+    <div id="modificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Módosítási kérelem</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="modificationForm">
+                    <input type="hidden" id="workSessionId" name="work_session_id">
+                    
+                    <div class="form-group">
+                        <label for="originalCheckIn">Eredeti belépés:</label>
+                        <input type="text" id="originalCheckIn" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="originalCheckOut">Eredeti kilépés:</label>
+                        <input type="text" id="originalCheckOut" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestedCheckIn">Kért belépési idő:</label>
+                        <input type="datetime-local" id="requestedCheckIn" name="requested_check_in">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestedCheckOut">Kért kilépési idő:</label>
+                        <input type="datetime-local" id="requestedCheckOut" name="requested_check_out">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestedLocation">Munkahely:</label>
+                        <select id="requestedLocation" name="requested_location">
+                            <option value="">-- Nincs módosítás --</option>
+                            <option value="office">Iroda</option>
+                            <option value="home_office">Home office</option>
+                            <option value="other">Egyéb</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reason">Indoklás: *</label>
+                        <textarea id="reason" name="reason" rows="4" required placeholder="Kérjük, adja meg a módosítás indokát..."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Mégse</button>
+                        <button type="submit" class="btn-submit">Kérelem beküldése</button>
+                        <div id="successCheckmark" class="checkmark-container">
+                            <div class="checkmark-circle">
+                                <div class="checkmark"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
