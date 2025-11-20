@@ -626,3 +626,45 @@ body {
     transform: none;
 }
 
+/* Success Checkmark Animation */
+.checkmark-container {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+}
+
+.checkmark-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #48bb78;
+    position: relative;
+    animation: circleAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(72, 187, 120, 0.4);
+}
+
+.checkmark {
+    width: 14px;
+    height: 8px;
+    border-left: 2.5px solid white;
+    border-bottom: 2.5px solid white;
+    transform: rotate(-45deg);
+    margin-top: -3px;
+    opacity: 0;
+    animation: checkAnim 0.3s 0.3s ease forwards;
+}
+
+@keyframes circleAnim {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes checkAnim {
+    0% { opacity: 0; transform: rotate(-45deg) scale(0.5); }
+    100% { opacity: 1; transform: rotate(-45deg) scale(1); }
+}
+
