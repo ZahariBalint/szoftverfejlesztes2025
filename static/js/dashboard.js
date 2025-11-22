@@ -18,6 +18,7 @@ const modificationForm = document.getElementById('modificationForm');
 const closeModalBtn = document.querySelector('.close');
 const cancelBtn = document.getElementById('cancelBtn');
 const successCheckmark = document.getElementById('successCheckmark');
+const adminPanelBtn = document.getElementById('adminPanelBtn');
 
 // State
 let weeklyData = null;
@@ -48,6 +49,10 @@ function loadUserInfo() {
         try {
             const user = JSON.parse(userStr);
             usernameSpan.textContent = user.username || 'Felhasználó';
+
+            if (user.role === 'admin') {
+                adminPanelBtn.style.display = 'inline-block';
+            }
         } catch (e) {
             console.error('Error parsing user data:', e);
         }
@@ -60,6 +65,7 @@ function setupEventListeners() {
     prevWeekBtn.addEventListener('click', () => navigateWeek(-1));
     nextWeekBtn.addEventListener('click', () => navigateWeek(1));
     todayBtn.addEventListener('click', goToCurrentWeek);
+    adminPanelBtn.addEventListener('click', () => window.location.href = '/admin');
 }
 
 function handleLogout() {

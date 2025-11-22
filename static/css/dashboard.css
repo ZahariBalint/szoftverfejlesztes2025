@@ -59,6 +59,17 @@ body {
     transition: all 0.3s ease;
 }
 
+.admin-btn{
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
 .logout-btn:hover {
     background: rgba(255, 255, 255, 0.3);
 }
